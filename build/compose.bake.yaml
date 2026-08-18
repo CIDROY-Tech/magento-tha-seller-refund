@@ -1,0 +1,69 @@
+# Pass 1 of the bake: stock MariaDB + the built search/stub images + the
+# installer web image. build/bake.sh brings this up, execs bake-inside.sh in
+# `web`, exports the warmed artefacts and a DB dump, then tears it down.
+#
+# Image refs are overridable so the bake can pass pinned/base-digest values;
+# the defaults match the local tags bake.sh builds.
+
+name: seller-refund-bake
+
+services:
+  db:
+    image: ${DB_BASE_IMAGE:-mariadb:10.11}
+    # Bake-only memory trim: the seed dataset is tiny, so a small buffer pool
+    # (overriding my.cnf's production 512M) keeps host RAM pressure down during
+    # the bake. The shipped compose.yaml keeps the production values.
+    command: ["--innodb-buffer-pool-size=128M"]
+    mem_limit: 512m
+    environment:
+      MARIADB_DATABASE: magento
+      MARIADB_USER: magento
+      MARIADB_PASSWORD: magento
+      MARIADB_ROOT_PASSWORD: root
+    volumes:
+      - ./docker/database/my.cnf:/etc/mysql/conf.d/zz-assignment.cnf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 60s
+
+  search:
+    image: ${SEARCH_IMAGE:-seller-refund-search:bake}
+    # Bake-only memory trim: a 256m heap indexes the tiny seed catalog fine and
+    # halves the JVM's reservation. The shipped compose.yaml keeps 512m.
+    environment:
+      OPENSEARCH_JAVA_OPTS: "-Xms256m -Xmx256m"
+    mem_limit: 640m
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s' >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 30s
+
+  erp-refund-stub:
+    image: ${STUB_IMAGE:-seller-refund-erp-stub:bake}
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:8081/health').then(function(r){process.exit(r.ok?0:1)}).catch(function(){process.exit(1)})\""]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  web:
+    image: ${INSTALLER_IMAGE:-seller-refund-web:installer}
+    mem_limit: 2g
+    depends_on:
+      db: { condition: service_healthy }
+      search: { condition: service_healthy }
+      erp-refund-stub: { condition: service_healthy }
+    environment:
+      WEB_PORT: "8080"
+      ERP_STUB_BASE_URL: "http://erp-refund-stub:8081"
+    ports:
+      - "8080:8080"

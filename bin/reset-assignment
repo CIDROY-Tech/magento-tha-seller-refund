@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# Reset the assignment stack.
+#   bin/reset-assignment [--yes] [--data-only]
+#
+#   (default)     tear down this project's containers and volumes, then bring
+#                 the stack back up (project-scoped; never prunes images or
+#                 other projects). Asks for confirmation unless --yes.
+#   --data-only   re-seed the assignment data and clear the stub state, leaving
+#                 the stack running.
+set -euo pipefail
+export MSYS_NO_PATHCONV=1
+
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
+YES=0
+DATA_ONLY=0
+for arg in "$@"; do
+  case "$arg" in
+    --yes) YES=1 ;;
+    --data-only) DATA_ONLY=1 ;;
+    *) echo "usage: reset-assignment [--yes] [--data-only]" >&2; exit 2 ;;
+  esac
+done
+
+if [ "$DATA_ONLY" -eq 1 ]; then
+  echo "Re-seeding assignment data and clearing stub state..."
+  docker compose exec -T -u www-data web php bin/magento assignment:seed --reset
+  docker compose exec -T web sh -c 'curl -fsS -X POST http://erp-refund-stub:8081/_debug/reset || true'
+  echo "Data reset complete."
+  exit 0
+fi
+
+if [ "$YES" -ne 1 ]; then
+  printf 'This will DESTROY this project'\''s volumes and re-create the stack. Continue? [y/N] '
+  read -r ans
+  case "$ans" in
+    y|Y|yes|YES) ;;
+    *) echo "aborted"; exit 1 ;;
+  esac
+fi
+
+echo "Recreating the stack (project-scoped; other projects untouched)..."
+docker compose down -v --remove-orphans
+docker compose up -d --wait
+echo "Reset complete. Run bin/assignment-status to check health."

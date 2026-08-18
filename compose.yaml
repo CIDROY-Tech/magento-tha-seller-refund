@@ -1,0 +1,139 @@
+# Seller Return & Refund take-home - local runtime.
+#
+# Everything here is pre-baked. `docker compose up` pulls four images by
+# digest and starts the stack; no build, install, or Composer step runs on
+# the candidate's machine. Wait for the `assignment-ready` banner, then use
+# the URLs and synthetic credentials in README.md.
+#
+# Ports, memory knobs, and the ERP stub address come from .env (copy
+# .env.example to .env to override). Give Docker at least 8 GB of RAM.
+
+name: seller-refund-takehome
+
+# Shared building blocks. Every service restarts unless stopped and caps its
+# JSON log files so a long-running stack never fills the disk.
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  db:
+    <<: [*restart, *logging]
+    image: ghcr.io/cidroy-tech/seller-refund-db:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    mem_limit: 1g
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      # First prove the application user can query the seeded schema, then let
+      # the image's own probe confirm InnoDB finished recovery.
+      test: ["CMD-SHELL", "mariadb -umagento -pmagento -e 'SELECT 1' magento && healthcheck.sh --connect --innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+      start_interval: 3s
+
+  search:
+    <<: [*restart, *logging]
+    image: ghcr.io/cidroy-tech/seller-refund-search:2.12.0@sha256:REPLACE_AT_PUBLISH
+    mem_limit: 1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - search-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s' >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+      start_interval: 3s
+
+  erp-refund-stub:
+    <<: [*restart, *logging]
+    image: ghcr.io/cidroy-tech/seller-refund-erp-stub:1.0.0@sha256:REPLACE_AT_PUBLISH
+    mem_limit: 128m
+    ports:
+      - "${STUB_PORT:-8081}:8081"
+    volumes:
+      - stub-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:8081/health').then(function(r){process.exit(r.ok?0:1)}).catch(function(){process.exit(1)})\""]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+      start_interval: 2s
+
+  web:
+    <<: [*restart, *logging]
+    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    mem_limit: 3g
+    depends_on:
+      db:
+        condition: service_healthy
+      search:
+        condition: service_healthy
+      erp-refund-stub:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    environment:
+      WEB_PORT: "${WEB_PORT:-8080}"
+      ERP_STUB_BASE_URL: "http://erp-refund-stub:8081"
+    volumes:
+      # The module ships inside the image; this bind mount lets the candidate
+      # edit it live for Part 3. See the edit matrix in README.md for when a
+      # cache/DI/static flush is needed after an edit.
+      - ./app/code/Acme/SellerRefund:/var/www/html/app/code/Acme/SellerRefund
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/assignment-health.php >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 120s
+      start_interval: 3s
+
+  assignment-ready:
+    <<: [*restart, *logging]
+    # Reuses the web image purely as a readiness gate: it waits for every
+    # service to answer, prints the banner, and touches a marker file that its
+    # own healthcheck watches.
+    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    mem_limit: 64m
+    entrypoint: ["/var/www/html/assignment-ready.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+      search:
+        condition: service_healthy
+      erp-refund-stub:
+        condition: service_healthy
+      web:
+        condition: service_healthy
+    environment:
+      WEB_PORT: "${WEB_PORT:-8080}"
+      STUB_PORT: "${STUB_PORT:-8081}"
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /tmp/assignment-ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+      start_interval: 3s
+
+volumes:
+  db-data:
+  search-data:
+  stub-data:

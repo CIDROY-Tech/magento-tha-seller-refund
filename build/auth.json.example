@@ -1,0 +1,9 @@
+{
+    "comment": "Not required. The bake installs Magento from the public Mage-OS mirror, which needs no credentials. This file documents the optional alternative of installing from repo.magento.com instead; if you use it, copy this to auth.json (git-ignored) and fill in your own public/private keys, then point the Composer repository at repo.magento.com.",
+    "http-basic": {
+        "repo.magento.com": {
+            "username": "YOUR_MAGENTO_PUBLIC_KEY",
+            "password": "YOUR_MAGENTO_PRIVATE_KEY"
+        }
+    }
+}

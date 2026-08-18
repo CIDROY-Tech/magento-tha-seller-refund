@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+# In-container test runner (baked to /usr/local/bin/assignment-test).
+#
+# Invoked by the host wrapper as:
+#   docker compose exec -T -u www-data web assignment-test [unit|integration|smoke|all] [--filter X]
+#
+# Clears the module's generated code so a stale DI class from an earlier branch
+# cannot mask a change, cleans caches, then runs the module-local phpunit
+# configs and the smoke suite. The exit code propagates to the caller.
+set -euo pipefail
+
+MAGE_ROOT=/var/www/html
+cd "$MAGE_ROOT"
+
+MODE=${1:-all}
+if [ "$#" -gt 0 ]; then shift; fi
+
+FILTER=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --filter) FILTER=${2:-}; shift 2 ;;
+    --filter=*) FILTER=${1#*=}; shift ;;
+    *) echo "assignment-test: ignoring unknown argument '$1'" >&2; shift ;;
+  esac
+done
+
+PHPUNIT="vendor/bin/phpunit"
+UNIT_CONF="app/code/Acme/SellerRefund/Test/Unit/phpunit.xml"
+INT_CONF="app/code/Acme/SellerRefund/Test/Integration/phpunit.xml"
+SMOKE="dev/tests/smoke/smoke.sh"
+
+FILTER_ARGS=()
+if [ -n "$FILTER" ]; then
+  FILTER_ARGS=(--filter "$FILTER")
+fi
+
+prepare() {
+  rm -rf generated/code/Acme generated/metadata/* 2>/dev/null || true
+  php bin/magento cache:clean >/dev/null 2>&1 || true
+}
+
+run_unit() {
+  echo "== unit =="
+  if [ ! -f "$UNIT_CONF" ]; then
+    echo "assignment-test: no unit suite ($UNIT_CONF) yet - skipping"
+    return 0
+  fi
+  php "$PHPUNIT" -c "$UNIT_CONF" "${FILTER_ARGS[@]}"
+}
+
+run_integration() {
+  echo "== integration =="
+  if [ ! -f "$INT_CONF" ]; then
+    echo "assignment-test: no integration suite ($INT_CONF) yet - skipping"
+    return 0
+  fi
+  php "$PHPUNIT" -c "$INT_CONF" "${FILTER_ARGS[@]}"
+}
+
+run_smoke() {
+  echo "== smoke =="
+  bash "$SMOKE"
+}
+
+prepare
+
+case "$MODE" in
+  unit) run_unit ;;
+  integration) run_integration ;;
+  smoke) run_smoke ;;
+  all) run_unit; run_integration; run_smoke ;;
+  *)
+    echo "usage: assignment-test [unit|integration|smoke|all] [--filter X]" >&2
+    exit 2
+    ;;
+esac

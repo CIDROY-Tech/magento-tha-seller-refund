@@ -1,0 +1,114 @@
+name: bake
+
+# Manual only. Builds the four assignment images and, when asked, pushes them
+# to GHCR and opens a PR pinning their digests into compose.yaml.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release suffix (e.g. r1)"
+        required: true
+        default: "r1"
+      push:
+        description: "Push images to GHCR and pin digests"
+        type: boolean
+        default: false
+
+permissions:
+  packages: write
+  contents: write
+
+jobs:
+  bake:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Bake (install, seed, compile, warm, local verify)
+        run: build/bake.sh ${{ inputs.tag }}
+
+      - name: Load resolved base-image digests
+        run: cat build/base-images.env >> "$GITHUB_ENV"
+
+      - name: Build and push web
+        id: web
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: build/Dockerfile
+          target: runtime
+          push: ${{ inputs.push }}
+          tags: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10-${{ inputs.tag }}
+          build-args: |
+            PHP_BASE_IMAGE=${{ env.PHP_BASE_IMAGE }}
+            COMPOSER_IMAGE=${{ env.COMPOSER_IMAGE }}
+            SEED_VERSION=${{ inputs.tag }}
+
+      - name: Build and push db
+        id: db
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/database/Dockerfile
+          push: ${{ inputs.push }}
+          tags: ghcr.io/cidroy-tech/seller-refund-db:2.4.7-p10-${{ inputs.tag }}
+          build-args: |
+            DB_BASE_IMAGE=${{ env.DB_BASE_IMAGE }}
+
+      - name: Build and push search
+        id: search
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/opensearch/Dockerfile
+          push: ${{ inputs.push }}
+          tags: ghcr.io/cidroy-tech/seller-refund-search:2.12.0-${{ inputs.tag }}
+          build-args: |
+            SEARCH_BASE_IMAGE=${{ env.SEARCH_BASE_IMAGE }}
+
+      - name: Build and push erp-stub
+        id: stub
+        uses: docker/build-push-action@v7
+        with:
+          context: erp-refund-stub
+          push: ${{ inputs.push }}
+          tags: ghcr.io/cidroy-tech/seller-refund-erp-stub:1.0.0
+          build-args: |
+            NODE_BASE_IMAGE=${{ env.NODE_BASE_IMAGE }}
+
+      - name: Digests to summary
+        run: |
+          {
+            echo "## Image digests (release ${{ inputs.tag }})"
+            echo ""
+            echo "| Image | Digest |"
+            echo "|---|---|"
+            echo "| web | ${{ steps.web.outputs.digest }} |"
+            echo "| db | ${{ steps.db.outputs.digest }} |"
+            echo "| search | ${{ steps.search.outputs.digest }} |"
+            echo "| erp-stub | ${{ steps.stub.outputs.digest }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Pin digests into compose.yaml
+        if: ${{ inputs.push }}
+        run: REGISTRY=ghcr.io/cidroy-tech build/pin-digests.sh ${{ inputs.tag }}
+
+      - name: Open digest-pin PR
+        if: ${{ inputs.push }}
+        uses: peter-evans/create-pull-request@v8
+        with:
+          title: "Pin image digests for ${{ inputs.tag }}"
+          commit-message: "Pin image digests for ${{ inputs.tag }}"
+          branch: pin-digests-${{ inputs.tag }}
+          add-paths: compose.yaml

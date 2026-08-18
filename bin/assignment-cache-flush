@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Clear Magento caches / generated code / static after editing the module.
+#   bin/assignment-cache-flush [--generated] [--static] [--upgrade] [--compile] [--all]
+#
+# Edit matrix (see README.md):
+#   PHP logic .......................... nothing (developer mode picks it up)
+#   etc/*.xml, .phtml templates, email . bin/assignment-cache-flush
+#   JS / LESS .......................... bin/assignment-cache-flush --static
+#   di.xml / constructors / plugins .... bin/assignment-cache-flush --generated
+#   db_schema.xml ...................... bin/assignment-cache-flush --upgrade
+#   switching branches ................. bin/assignment-cache-flush --all
+set -euo pipefail
+export MSYS_NO_PATHCONV=1
+
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+exec docker compose exec -T -u www-data web assignment-cache-flush "$@"

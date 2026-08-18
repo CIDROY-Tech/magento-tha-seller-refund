@@ -1,0 +1,25 @@
+# Local verification overlay for pass 2 of the bake.
+#
+# Use it with the shipped compose file to run the freshly built images by their
+# local tags instead of the published GHCR digests:
+#
+#   docker compose -f compose.yaml -f build/compose.local.yaml up -d --wait
+#
+# Everything else (ports, healthchecks, volumes, the module bind mount) is
+# inherited from compose.yaml.
+
+services:
+  db:
+    image: ${DB_IMAGE:-seller-refund-db:local}
+
+  search:
+    image: ${SEARCH_IMAGE:-seller-refund-search:local}
+
+  erp-refund-stub:
+    image: ${STUB_IMAGE:-seller-refund-erp-stub:local}
+
+  web:
+    image: ${WEB_IMAGE:-seller-refund-web:local}
+
+  assignment-ready:
+    image: ${WEB_IMAGE:-seller-refund-web:local}

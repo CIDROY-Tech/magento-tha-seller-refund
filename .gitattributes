@@ -1,0 +1,21 @@
+# Normalise line endings: the repo is authored on Windows but runs in Linux containers.
+* text=auto eol=lf
+
+# Shell scripts and PHP must stay LF even if edited on Windows.
+*.sh   text eol=lf
+*.bash text eol=lf
+*.php  text eol=lf
+*.phtml text eol=lf
+
+# PowerShell twins keep CRLF.
+*.ps1  text eol=crlf
+
+# Binary assets: never touch.
+*.tgz  binary
+*.gz   binary
+*.zip  binary
+*.png  binary
+*.jpg  binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary

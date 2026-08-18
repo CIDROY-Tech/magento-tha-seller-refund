@@ -1,0 +1,11 @@
+# Optional debug overlay: publish the MariaDB port to the host so you can
+# connect with a SQL client. Not needed for normal use - the app reaches the
+# database over the internal Compose network.
+#
+#   docker compose -f compose.yaml -f build/compose.debug.yaml up -d
+#   # then: mariadb -h 127.0.0.1 -P ${DB_PORT:-33306} -umagento -pmagento magento
+
+services:
+  db:
+    ports:
+      - "${DB_PORT:-33306}:3306"

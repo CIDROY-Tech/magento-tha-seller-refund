@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# In-container cache/DI/static helper (baked to /usr/local/bin).
+#
+# Invoked by the host wrapper as:
+#   docker compose exec -T -u www-data web assignment-cache-flush [flags]
+#
+# The image runs in developer mode with static files deployed as copies (not
+# symlinks), so different kinds of edit need different amounts of clearing.
+# A plain run always flushes cache; the flags add the rest.
+#
+#   (none)       cache:flush only
+#   --generated  drop compiled DI / generated code for the module
+#   --static     drop deployed static + preprocessed for the module
+#   --upgrade    setup:upgrade --keep-generated (after db_schema changes)
+#   --compile    setup:di:compile
+#   --all        --generated --static --upgrade (use after switching branches)
+set -euo pipefail
+
+MAGE_ROOT=/var/www/html
+cd "$MAGE_ROOT"
+
+DO_GENERATED=0
+DO_STATIC=0
+DO_UPGRADE=0
+DO_COMPILE=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --generated) DO_GENERATED=1 ;;
+    --static)    DO_STATIC=1 ;;
+    --upgrade)   DO_UPGRADE=1 ;;
+    --compile)   DO_COMPILE=1 ;;
+    --all)       DO_GENERATED=1; DO_STATIC=1; DO_UPGRADE=1 ;;
+    *)
+      echo "unknown option: $arg" >&2
+      echo "usage: assignment-cache-flush [--generated] [--static] [--upgrade] [--compile] [--all]" >&2
+      exit 2
+      ;;
+  esac
+done
+
+if [ "$DO_GENERATED" -eq 1 ]; then
+  echo "removing generated code/metadata"
+  rm -rf generated/metadata generated/code/Acme 2>/dev/null || true
+fi
+
+if [ "$DO_STATIC" -eq 1 ]; then
+  echo "removing deployed static + preprocessed for Acme_SellerRefund"
+  rm -rf pub/static/adminhtml/*/*/Acme_SellerRefund \
+         pub/static/frontend/*/*/Acme_SellerRefund \
+         var/view_preprocessed/* 2>/dev/null || true
+fi
+
+if [ "$DO_UPGRADE" -eq 1 ]; then
+  echo "setup:upgrade --keep-generated"
+  php bin/magento setup:upgrade --keep-generated
+fi
+
+if [ "$DO_COMPILE" -eq 1 ]; then
+  echo "setup:di:compile"
+  php bin/magento setup:di:compile
+fi
+
+echo "cache:flush"
+php bin/magento cache:flush

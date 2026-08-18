@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+# Show the health of the assignment stack: service states, the web health JSON,
+# the stub's recorded-refund count, logs for anything unhealthy, and the
+# OpenSearch preflight if search is not healthy.
+#   bin/assignment-status
+set -euo pipefail
+export MSYS_NO_PATHCONV=1
+
+cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+
+SERVICES="db search erp-refund-stub web assignment-ready"
+
+health_of() {
+  local cid=$1
+  docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$cid" 2>/dev/null || echo "unknown"
+}
+
+echo "== compose ps =="
+docker compose ps || true
+
+echo ""
+echo "== web health =="
+docker compose exec -T web sh -c 'curl -fsS http://127.0.0.1:8080/assignment-health.php' 2>/dev/null \
+  || echo "(web health endpoint not reachable)"
+
+echo ""
+echo "== stub recorded refunds =="
+docker compose exec -T web sh -c 'curl -fsS http://erp-refund-stub:8081/_debug/refunds' 2>/dev/null \
+  || echo "(stub not reachable)"
+
+echo ""
+echo "== unhealthy service logs =="
+any_unhealthy=0
+for svc in $SERVICES; do
+  cid=$(docker compose ps -q "$svc" 2>/dev/null || true)
+  if [ -z "$cid" ]; then
+    echo "-- ${svc}: not running --"
+    any_unhealthy=1
+    continue
+  fi
+  h=$(health_of "$cid")
+  if [ "$h" != "healthy" ] && [ "$h" != "running" ]; then
+    echo "-- ${svc} (${h}): last 30 log lines --"
+    docker compose logs --tail 30 "$svc" 2>/dev/null || true
+    any_unhealthy=1
+  fi
+done
+[ "$any_unhealthy" -eq 0 ] && echo "(all services healthy)"
+
+echo ""
+echo "== web exception + cron log tail =="
+docker compose exec -T web sh -c \
+  'tail -n 20 /var/www/html/var/log/exception.log 2>/dev/null; echo "---"; tail -n 20 /var/www/html/var/log/assignment-cron.log 2>/dev/null' \
+  2>/dev/null || echo "(logs not reachable)"
+
+# Preflight if search is unhealthy.
+search_cid=$(docker compose ps -q search 2>/dev/null || true)
+if [ -n "$search_cid" ]; then
+  sh=$(health_of "$search_cid")
+  if [ "$sh" != "healthy" ] && [ "$sh" != "running" ]; then
+    echo ""
+    echo "== search preflight =="
+    bash docker/opensearch/preflight.sh || true
+  fi
+fi

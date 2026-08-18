@@ -1,0 +1,11 @@
+# OpenSearch configuration for the assignment search node.
+# Single-node cluster; the security plugin is removed from the image, so the
+# entrypoint disables transport security on its own (no password env needed).
+
+cluster.name: seller-refund
+discovery.type: single-node
+network.host: 0.0.0.0
+bootstrap.memory_lock: true
+# mmap is disabled so the node runs without host vm.max_map_count tuning;
+# bootstrap checks are not enforced under discovery.type=single-node.
+node.store.allow_mmap: false

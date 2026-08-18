@@ -1,0 +1,32 @@
+# Keep the build context small and prevent internal material from ever
+# entering an image layer.
+
+.git
+.gitignore
+.gitattributes
+.editorconfig
+
+# Internal-only material (never shipped, never baked).
+.internal
+.remember
+submission
+docs
+
+# Local dev noise.
+**/node_modules
+**/.DS_Store
+**/Thumbs.db
+**/*.swp
+.idea
+.vscode
+
+# Build artefacts: ignore everything except the two files the Dockerfiles
+# consume (produced by build/bake.sh pass 1).
+build/artifacts/*
+!build/artifacts/web
+!build/artifacts/db
+build/artifacts/web/*
+!build/artifacts/web/web-artifacts.tgz
+build/artifacts/db/*
+!build/artifacts/db/seed.sql.gz
+build/base-images.env
