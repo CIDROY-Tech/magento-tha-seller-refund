@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Acme\SellerRefund\Api\Data\RefundInterface" type="Acme\SellerRefund\Model\Refund"/>
+    <preference for="Acme\SellerRefund\Api\Data\RefundItemInterface" type="Acme\SellerRefund\Model\RefundItem"/>
+    <preference for="Acme\SellerRefund\Api\Data\RefundEventInterface" type="Acme\SellerRefund\Model\RefundEvent"/>
+    <preference for="Acme\SellerRefund\Api\RefundRepositoryInterface" type="Acme\SellerRefund\Model\RefundRepository"/>
+
+    <type name="Magento\Framework\Console\CommandListInterface">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="acmeSellerRefundOutboxWork" xsi:type="object">Acme\SellerRefund\Console\Command\OutboxWorkCommand</item>
+                <item name="acmeSellerRefundReconcile" xsi:type="object">Acme\SellerRefund\Console\Command\ReconcileCommand</item>
+                <item name="acmeSellerRefundSettlementExport" xsi:type="object">Acme\SellerRefund\Console\Command\SettlementExportCommand</item>
+                <item name="acmeSellerRefundSyncExport" xsi:type="object">Acme\SellerRefund\Console\Command\SyncExportCommand</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

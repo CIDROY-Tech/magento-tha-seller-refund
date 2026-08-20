@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="mp_refund" resource="default" engine="innodb" comment="Seller refund request">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="varchar" name="refund_no" length="32" nullable="false" comment="Display number and Create Refund idempotency key"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false" comment="Platform order ID"/>
+        <column xsi:type="varchar" name="seller_order_id" length="32" nullable="true" comment="Seller order ID"/>
+        <column xsi:type="varchar" name="refund_type" length="16" nullable="false" default="partial" comment="full or partial"/>
+        <column xsi:type="varchar" name="reason_code" length="32" nullable="false" comment="Refund reason code"/>
+        <column xsi:type="varchar" name="status" length="32" nullable="false" default="draft" comment="Lifecycle main status"/>
+        <column xsi:type="decimal" name="subtotal_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Subtotal snapshot"/>
+        <column xsi:type="decimal" name="shipping_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Shipping snapshot"/>
+        <column xsi:type="decimal" name="tax_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Tax snapshot"/>
+        <column xsi:type="decimal" name="grand_total" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Grand total snapshot"/>
+        <column xsi:type="varchar" name="currency_code" length="8" nullable="false" default="JPY" comment="Currency code"/>
+        <column xsi:type="varchar" name="erp_refund_id" length="64" nullable="true" comment="Identifier returned by the ERP on Create Refund"/>
+        <column xsi:type="varchar" name="create_status" length="32" nullable="false" default="not_started" comment="Create Refund sub-status"/>
+        <column xsi:type="varchar" name="status_check_status" length="32" nullable="false" default="not_started" comment="Read Refund Status sub-status"/>
+        <column xsi:type="varchar" name="confirm_status" length="32" nullable="false" default="not_started" comment="Confirm Refund sub-status"/>
+        <column xsi:type="varchar" name="cash_refund_status" length="32" nullable="false" default="not_started" comment="Cash refund registration sub-status"/>
+        <column xsi:type="varchar" name="transaction_number" length="64" nullable="true" comment="Bank transfer reference"/>
+        <column xsi:type="date" name="transaction_date" nullable="true" comment="Bank transfer date"/>
+        <column xsi:type="int" name="version" unsigned="true" nullable="false" default="1" comment="Optimistic concurrency version"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="int" name="created_by" unsigned="true" nullable="true" comment="Admin user who created the refund"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <column xsi:type="int" name="updated_by" unsigned="true" nullable="true" comment="Admin user who last updated the refund"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="MP_REFUND_REFUND_NO">
+            <column name="refund_no"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MP_REFUND_ORDER_ID_SALES_ORDER_ENTITY_ID" table="mp_refund" column="order_id" referenceTable="sales_order" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="MP_REFUND_STATUS_CREATED_AT" indexType="btree">
+            <column name="status"/>
+            <column name="created_at"/>
+        </index>
+        <index referenceId="MP_REFUND_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+    </table>
+
+    <table name="mp_refund_item" resource="default" engine="innodb" comment="Immutable refunded line snapshot">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="refund_id" unsigned="true" nullable="false" comment="Parent refund ID"/>
+        <column xsi:type="int" name="order_item_id" unsigned="true" nullable="false" comment="Order item ID"/>
+        <column xsi:type="varchar" name="sku" length="64" nullable="false" comment="SKU snapshot"/>
+        <column xsi:type="varchar" name="product_name" length="255" nullable="false" comment="Product name snapshot"/>
+        <column xsi:type="decimal" name="qty_ordered" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Ordered quantity"/>
+        <column xsi:type="decimal" name="qty_refunded_before" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Previously refunded quantity"/>
+        <column xsi:type="decimal" name="qty_refund" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Refunded quantity"/>
+        <column xsi:type="decimal" name="qty_refundable_after" scale="4" precision="12" unsigned="false" nullable="false" default="0" comment="Remaining refundable quantity"/>
+        <column xsi:type="decimal" name="unit_price" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Unit price snapshot"/>
+        <column xsi:type="decimal" name="row_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Ex-tax row amount"/>
+        <column xsi:type="decimal" name="shipping_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Line shipping amount"/>
+        <column xsi:type="decimal" name="tax_rate" scale="4" precision="9" unsigned="false" nullable="false" default="0" comment="Tax rate applied"/>
+        <column xsi:type="varchar" name="tax_code" length="8" nullable="false" comment="Business tax code"/>
+        <column xsi:type="decimal" name="tax_amount" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Tax amount"/>
+        <column xsi:type="decimal" name="grand_total" scale="4" precision="20" unsigned="false" nullable="false" default="0" comment="Line grand total"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MP_REFUND_ITEM_REFUND_ID_MP_REFUND_ENTITY_ID" table="mp_refund_item" column="refund_id" referenceTable="mp_refund" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="MP_REFUND_ITEM_REFUND_ID" indexType="btree">
+            <column name="refund_id"/>
+        </index>
+        <index referenceId="MP_REFUND_ITEM_ORDER_ITEM_ID" indexType="btree">
+            <column name="order_item_id"/>
+        </index>
+    </table>
+
+    <table name="mp_refund_event" resource="default" engine="innodb" comment="Append-only refund audit log">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="refund_id" unsigned="true" nullable="false" comment="Parent refund ID"/>
+        <column xsi:type="varchar" name="event_type" length="32" nullable="false" comment="Event type"/>
+        <column xsi:type="varchar" name="api_code" length="32" nullable="true" comment="ERP operation code"/>
+        <column xsi:type="varchar" name="event_status" length="32" nullable="false" comment="Event outcome"/>
+        <column xsi:type="varchar" name="status_from" length="32" nullable="true" comment="Status before transition"/>
+        <column xsi:type="varchar" name="status_to" length="32" nullable="true" comment="Status after transition"/>
+        <column xsi:type="text" name="request_payload" nullable="true" comment="Redacted request payload"/>
+        <column xsi:type="text" name="response_payload" nullable="true" comment="Redacted response payload"/>
+        <column xsi:type="varchar" name="error_code" length="64" nullable="true" comment="Error code"/>
+        <column xsi:type="int" name="attempt_no" unsigned="true" nullable="false" default="1" comment="Attempt number"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="int" name="created_by" unsigned="true" nullable="true" comment="Actor"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MP_REFUND_EVENT_REFUND_ID_MP_REFUND_ENTITY_ID" table="mp_refund_event" column="refund_id" referenceTable="mp_refund" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="MP_REFUND_EVENT_REFUND_ID_CREATED_AT" indexType="btree">
+            <column name="refund_id"/>
+            <column name="created_at"/>
+        </index>
+    </table>
+
+    <table name="mp_refund_outbox" resource="default" engine="innodb" comment="Durable async work outbox">
+        <column xsi:type="int" name="entity_id" unsigned="true" nullable="false" identity="true" comment="Entity ID"/>
+        <column xsi:type="int" name="refund_id" unsigned="true" nullable="false" comment="Parent refund ID"/>
+        <column xsi:type="varchar" name="operation" length="32" nullable="false" comment="Operation: create, status_check, confirm"/>
+        <column xsi:type="varchar" name="state" length="16" nullable="false" default="pending" comment="pending, done, dead"/>
+        <column xsi:type="int" name="attempts" unsigned="true" nullable="false" default="0" comment="Attempt count"/>
+        <column xsi:type="timestamp" name="available_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Earliest processing time"/>
+        <column xsi:type="text" name="last_error" nullable="true" comment="Last error summary"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP" comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP" comment="Updated at"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="entity_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="MP_REFUND_OUTBOX_REFUND_ID_MP_REFUND_ENTITY_ID" table="mp_refund_outbox" column="refund_id" referenceTable="mp_refund" referenceColumn="entity_id" onDelete="CASCADE"/>
+        <index referenceId="MP_REFUND_OUTBOX_STATE_AVAILABLE_AT" indexType="btree">
+            <column name="state"/>
+            <column name="available_at"/>
+        </index>
+    </table>
+
+    <table name="mp_refund_sequence" resource="default" engine="innodb" comment="Per-day refund number sequence">
+        <column xsi:type="varchar" name="date_key" length="8" nullable="false" comment="YYYYMMDD sequence bucket"/>
+        <column xsi:type="int" name="current_value" unsigned="true" nullable="false" default="0" comment="Current sequence value"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="date_key"/>
+        </constraint>
+    </table>
+
+    <table name="sales_order" resource="sales" engine="innodb">
+        <column xsi:type="varchar" name="mp_seller_order_id" length="32" nullable="true" comment="Seller order ID"/>
+        <column xsi:type="datetime" name="mp_delivered_at" nullable="true" comment="Delivery timestamp for the refund window"/>
+    </table>
+
+    <table name="sales_order_item" resource="sales" engine="innodb">
+        <column xsi:type="varchar" name="mp_seller_code" length="32" nullable="true" comment="Seller code; NULL for first-party lines"/>
+        <column xsi:type="int" name="mp_tax_class" unsigned="true" nullable="true" comment="Snapshot of the product mp_tax_class option ID"/>
+    </table>
+</schema>

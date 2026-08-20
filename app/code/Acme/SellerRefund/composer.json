@@ -1,0 +1,22 @@
+{
+    "name": "acme/module-seller-refund",
+    "description": "Seller return and refund workflow for delivered seller orders.",
+    "type": "magento2-module",
+    "license": "proprietary",
+    "require": {
+        "php": "~8.3.0",
+        "magento/framework": "*",
+        "magento/module-sales": "*",
+        "magento/module-catalog": "*",
+        "magento/module-eav": "*",
+        "magento/module-email": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Acme\\SellerRefund\\": ""
+        }
+    }
+}

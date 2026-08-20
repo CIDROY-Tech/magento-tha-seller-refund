@@ -1,0 +1,134 @@
+{
+    "mp_refund": {
+        "column": {
+            "entity_id": true,
+            "refund_no": true,
+            "order_id": true,
+            "seller_order_id": true,
+            "refund_type": true,
+            "reason_code": true,
+            "status": true,
+            "subtotal_amount": true,
+            "shipping_amount": true,
+            "tax_amount": true,
+            "grand_total": true,
+            "currency_code": true,
+            "erp_refund_id": true,
+            "create_status": true,
+            "status_check_status": true,
+            "confirm_status": true,
+            "cash_refund_status": true,
+            "transaction_number": true,
+            "transaction_date": true,
+            "version": true,
+            "created_at": true,
+            "created_by": true,
+            "updated_at": true,
+            "updated_by": true
+        },
+        "index": {
+            "MP_REFUND_STATUS_CREATED_AT": true,
+            "MP_REFUND_ORDER_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MP_REFUND_REFUND_NO": true,
+            "MP_REFUND_ORDER_ID_SALES_ORDER_ENTITY_ID": true
+        }
+    },
+    "mp_refund_item": {
+        "column": {
+            "entity_id": true,
+            "refund_id": true,
+            "order_item_id": true,
+            "sku": true,
+            "product_name": true,
+            "qty_ordered": true,
+            "qty_refunded_before": true,
+            "qty_refund": true,
+            "qty_refundable_after": true,
+            "unit_price": true,
+            "row_amount": true,
+            "shipping_amount": true,
+            "tax_rate": true,
+            "tax_code": true,
+            "tax_amount": true,
+            "grand_total": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "MP_REFUND_ITEM_REFUND_ID": true,
+            "MP_REFUND_ITEM_ORDER_ITEM_ID": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MP_REFUND_ITEM_REFUND_ID_MP_REFUND_ENTITY_ID": true
+        }
+    },
+    "mp_refund_event": {
+        "column": {
+            "entity_id": true,
+            "refund_id": true,
+            "event_type": true,
+            "api_code": true,
+            "event_status": true,
+            "status_from": true,
+            "status_to": true,
+            "request_payload": true,
+            "response_payload": true,
+            "error_code": true,
+            "attempt_no": true,
+            "created_at": true,
+            "created_by": true
+        },
+        "index": {
+            "MP_REFUND_EVENT_REFUND_ID_CREATED_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MP_REFUND_EVENT_REFUND_ID_MP_REFUND_ENTITY_ID": true
+        }
+    },
+    "mp_refund_outbox": {
+        "column": {
+            "entity_id": true,
+            "refund_id": true,
+            "operation": true,
+            "state": true,
+            "attempts": true,
+            "available_at": true,
+            "last_error": true,
+            "created_at": true,
+            "updated_at": true
+        },
+        "index": {
+            "MP_REFUND_OUTBOX_STATE_AVAILABLE_AT": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "MP_REFUND_OUTBOX_REFUND_ID_MP_REFUND_ENTITY_ID": true
+        }
+    },
+    "mp_refund_sequence": {
+        "column": {
+            "date_key": true,
+            "current_value": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "mp_seller_order_id": true,
+            "mp_delivered_at": true
+        }
+    },
+    "sales_order_item": {
+        "column": {
+            "mp_seller_code": true,
+            "mp_tax_class": true
+        }
+    }
+}

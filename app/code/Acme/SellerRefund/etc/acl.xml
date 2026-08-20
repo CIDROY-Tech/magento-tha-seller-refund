@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Acme_SellerRefund::refund" title="Seller Refunds" sortOrder="90">
+                    <resource id="Acme_SellerRefund::view" title="View Refunds" sortOrder="10"/>
+                    <resource id="Acme_SellerRefund::create" title="Create Refund" sortOrder="20"/>
+                    <resource id="Acme_SellerRefund::cash_register" title="Register Cash Refund" sortOrder="30"/>
+                    <resource id="Acme_SellerRefund::retry" title="Retry Refund Operation" sortOrder="40"/>
+                    <resource id="Acme_SellerRefund::cancel" title="Cancel Refund" sortOrder="50"/>
+                    <resource id="Acme_SellerRefund::audit" title="View Refund Audit Log" sortOrder="60"/>
+                    <resource id="Acme_SellerRefund::receipt" title="Download Reissued Receipt" sortOrder="70"/>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

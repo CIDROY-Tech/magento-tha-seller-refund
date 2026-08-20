@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="acme_seller_refund_confirmed">
+        <observer name="acme_seller_refund_send_confirmation_email" instance="Acme\SellerRefund\Observer\SendConfirmationEmail"/>
+    </event>
+</config>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="acme_seller_refund">
+        <job name="acme_refund_outbox_work" instance="Acme\SellerRefund\Cron\WorkOutbox" method="execute">
+            <schedule>* * * * *</schedule>
+        </job>
+        <job name="acme_refund_reconcile" instance="Acme\SellerRefund\Cron\Reconcile" method="execute">
+            <schedule>*/15 * * * *</schedule>
+        </job>
+    </group>
+</config>
