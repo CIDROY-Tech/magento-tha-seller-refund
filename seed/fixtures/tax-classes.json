@@ -1,0 +1,11 @@
+{
+    "note": "Synthetic, non-production. Mirrors Acme\\AssignmentSeed\\Model\\Seed\\SeedData. The mp_tax_class product attribute is a global-scope select whose store-0 option VALUES are the business tax codes below. The backing eav option ids are assigned by shuffled inserts after a deleted throwaway option, so an option id is never equal to (nor ordered like) the business code and differs per environment. TaxCodeResolver maps option id to the store-0 value; correctness depends on the value being the business code.",
+    "attribute_code": "mp_tax_class",
+    "entity_type": "catalog_product",
+    "scope": "global",
+    "tax_classes": [
+        { "code": "999", "rate": "0.0000", "description": "tax-exempt" },
+        { "code": "010", "rate": "0.1000", "description": "10 percent standard" },
+        { "code": "008", "rate": "0.0800", "description": "8 percent reduced" }
+    ]
+}

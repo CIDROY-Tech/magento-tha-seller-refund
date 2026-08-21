@@ -1,0 +1,24 @@
+{
+    "name": "acme/module-assignment-seed",
+    "description": "Deterministic synthetic seed data for the seller return and refund assignment.",
+    "type": "magento2-module",
+    "license": "proprietary",
+    "require": {
+        "php": "~8.3.0",
+        "magento/framework": "*",
+        "magento/module-sales": "*",
+        "magento/module-catalog": "*",
+        "magento/module-eav": "*",
+        "magento/module-customer": "*",
+        "magento/module-theme": "*",
+        "acme/module-seller-refund": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Acme\\AssignmentSeed\\": ""
+        }
+    }
+}

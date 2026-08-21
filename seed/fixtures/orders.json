@@ -1,0 +1,112 @@
+{
+    "note": "Synthetic, non-production. Mirrors Acme\\AssignmentSeed\\Model\\Seed\\SeedData::orders(). Amounts are ex-tax JPY unless suffixed _incl_tax; money is stored as decimal(20,4) strings. delivered_offset_days is relative to the seed run time. Line tax = row_amount * rate; core lines are excluded from refunds. Shipping is 0 on every seeded order.",
+    "currency": "JPY",
+    "seller_code": "SLR-100",
+    "orders": [
+        {
+            "increment_id": "SR-ORD-1001",
+            "seller_order_id": "SO-1001",
+            "delivered_offset_days": -5,
+            "state": "complete",
+            "scenario": "pure-seller single line; in window; refundable",
+            "lines": [
+                { "sku": "SELLER-RED-01", "qty": 2, "seller": true, "tax_code": "010", "unit_price": "1200", "row_amount": "2400", "tax_amount": "240" }
+            ],
+            "order_totals": { "subtotal": "2400", "tax": "240", "shipping": "0", "grand_total": "2640" },
+            "refund": null
+        },
+        {
+            "increment_id": "SR-ORD-1002",
+            "seller_order_id": "SO-1002",
+            "delivered_offset_days": -5,
+            "state": "complete",
+            "scenario": "mixed seller + core; in window; matches FRD 9.1 payload example",
+            "lines": [
+                { "sku": "SELLER-RED-01", "qty": 1, "seller": true, "tax_code": "010", "unit_price": "1200", "row_amount": "1200", "tax_amount": "120" },
+                { "sku": "SELLER-BLU-02", "qty": 2, "seller": true, "tax_code": "008", "unit_price": "800", "row_amount": "1600", "tax_amount": "128" },
+                { "sku": "CORE-STD-01", "qty": 1, "seller": false, "tax_code": null, "unit_price": "2000", "row_amount": "2000", "tax_amount": "200" }
+            ],
+            "order_totals": { "subtotal": "4800", "tax": "448", "shipping": "0", "grand_total": "5248" },
+            "refund": null
+        },
+        {
+            "increment_id": "SR-ORD-1003",
+            "seller_order_id": "SO-1003",
+            "delivered_offset_days": -6,
+            "state": "complete",
+            "scenario": "prior partial refund; SELLER-YEL-04 has 2 of 3 already refunded (remaining 1)",
+            "lines": [
+                { "sku": "SELLER-YEL-04", "qty": 3, "seller": true, "tax_code": "010", "unit_price": "3000", "row_amount": "9000", "tax_amount": "900" },
+                { "sku": "SELLER-GRN-03", "qty": 1, "seller": true, "tax_code": "999", "unit_price": "1500", "row_amount": "1500", "tax_amount": "0" }
+            ],
+            "order_totals": { "subtotal": "10500", "tax": "900", "shipping": "0", "grand_total": "11400" },
+            "refund": {
+                "seq": 900001,
+                "status": "erp_confirmed",
+                "type": "partial",
+                "reason_code": "defect",
+                "erp_refund_id": "ERP-8100103",
+                "create_status": "succeeded",
+                "status_check_status": "succeeded",
+                "confirm_status": "succeeded",
+                "cash_refund_status": "succeeded",
+                "transaction_number": "TXN-SEED-1003",
+                "totals": { "subtotal": "6000", "tax": "600", "shipping": "0", "grand_total": "6600" },
+                "items": [
+                    { "sku": "SELLER-YEL-04", "qty_refunded_before": 0, "qty_refund": 2, "qty_refundable_after": 1, "unit_price": "3000", "row_amount": "6000", "tax_code": "010", "tax_rate": "0.1000", "tax_amount": "600", "grand_total": "6600" }
+                ]
+            }
+        },
+        {
+            "increment_id": "SR-ORD-1004",
+            "seller_order_id": "SO-1004",
+            "delivered_offset_days": -20,
+            "state": "complete",
+            "scenario": "expired; delivered outside the 14-day window; Refund action disabled by BR-02",
+            "lines": [
+                { "sku": "SELLER-RED-01", "qty": 1, "seller": true, "tax_code": "010", "unit_price": "1200", "row_amount": "1200", "tax_amount": "120" }
+            ],
+            "order_totals": { "subtotal": "1200", "tax": "120", "shipping": "0", "grand_total": "1320" },
+            "refund": null
+        },
+        {
+            "increment_id": "SR-ORD-1005",
+            "seller_order_id": "SO-1005",
+            "delivered_offset_days": -5,
+            "state": "complete",
+            "scenario": "core-only; no seller line; refund unavailable",
+            "lines": [
+                { "sku": "CORE-STD-01", "qty": 1, "seller": false, "tax_code": null, "unit_price": "2000", "row_amount": "2000", "tax_amount": "200" }
+            ],
+            "order_totals": { "subtotal": "2000", "tax": "200", "shipping": "0", "grand_total": "2200" },
+            "refund": null
+        },
+        {
+            "increment_id": "SR-ORD-1006",
+            "seller_order_id": "SO-1006",
+            "delivered_offset_days": -4,
+            "state": "complete",
+            "scenario": "refund pre-advanced to cash_refunded so the Confirm path is reachable",
+            "lines": [
+                { "sku": "SELLER-BLU-02", "qty": 1, "seller": true, "tax_code": "008", "unit_price": "800", "row_amount": "800", "tax_amount": "64" }
+            ],
+            "order_totals": { "subtotal": "800", "tax": "64", "shipping": "0", "grand_total": "864" },
+            "refund": {
+                "seq": 900002,
+                "status": "cash_refunded",
+                "type": "full",
+                "reason_code": "customer_return",
+                "erp_refund_id": "ERP-8100106",
+                "create_status": "succeeded",
+                "status_check_status": "not_started",
+                "confirm_status": "not_started",
+                "cash_refund_status": "succeeded",
+                "transaction_number": "TXN-SEED-1006",
+                "totals": { "subtotal": "800", "tax": "64", "shipping": "0", "grand_total": "864" },
+                "items": [
+                    { "sku": "SELLER-BLU-02", "qty_refunded_before": 0, "qty_refund": 1, "qty_refundable_after": 0, "unit_price": "800", "row_amount": "800", "tax_code": "008", "tax_rate": "0.0800", "tax_amount": "64", "grand_total": "864" }
+                ]
+            }
+        }
+    ]
+}

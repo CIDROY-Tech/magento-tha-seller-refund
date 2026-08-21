@@ -1,0 +1,30 @@
+{
+    "note": "Synthetic, non-production credentials for the assignment only. Never reuse. Passwords are documented in cleartext here on purpose so the assignment can be exercised; they are stored hashed by the platform.",
+    "customer": {
+        "email": "refund.customer@example.com",
+        "password": "RefundCustomer#2026",
+        "firstname": "Rei",
+        "lastname": "Tanaka",
+        "owns_orders": ["SR-ORD-1001", "SR-ORD-1002", "SR-ORD-1003", "SR-ORD-1004", "SR-ORD-1005", "SR-ORD-1006"]
+    },
+    "admin_users": [
+        {
+            "username": "cs_agent",
+            "password": "CsAgent#2026",
+            "role": "Assignment CS",
+            "privileges": ["Acme_SellerRefund::view", "Acme_SellerRefund::create", "Acme_SellerRefund::cash_register"]
+        },
+        {
+            "username": "finance_user",
+            "password": "FinanceUser#2026",
+            "role": "Assignment Finance",
+            "privileges": ["Acme_SellerRefund::view", "Acme_SellerRefund::create", "Acme_SellerRefund::cash_register", "Acme_SellerRefund::retry", "Acme_SellerRefund::audit"]
+        },
+        {
+            "username": "refund_admin",
+            "password": "RefundAdmin#2026",
+            "role": "Assignment Refund Administrator",
+            "privileges": ["Acme_SellerRefund::view", "Acme_SellerRefund::create", "Acme_SellerRefund::cash_register", "Acme_SellerRefund::retry", "Acme_SellerRefund::cancel", "Acme_SellerRefund::audit", "Acme_SellerRefund::receipt"]
+        }
+    ]
+}

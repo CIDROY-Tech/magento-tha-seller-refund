@@ -1,0 +1,11 @@
+{
+    "note": "Synthetic, non-production. Mirrors Acme\\AssignmentSeed\\Model\\Seed\\SeedData::products(). Prices are ex-tax JPY. Seller products carry an mp_tax_class option id (resolved from tax_code at seed time) and their order lines carry seller_code; the core product carries neither.",
+    "seller_code": "SLR-100",
+    "products": [
+        { "sku": "SELLER-RED-01", "name": "Seller Red Widget", "price": "1200", "seller": true, "tax_code": "010" },
+        { "sku": "SELLER-BLU-02", "name": "Seller Blue Gadget", "price": "800", "seller": true, "tax_code": "008" },
+        { "sku": "SELLER-GRN-03", "name": "Seller Green Accessory", "price": "1500", "seller": true, "tax_code": "999" },
+        { "sku": "SELLER-YEL-04", "name": "Seller Yellow Kit", "price": "3000", "seller": true, "tax_code": "010" },
+        { "sku": "CORE-STD-01", "name": "Core Standard Item", "price": "2000", "seller": false, "tax_code": null }
+    ]
+}
