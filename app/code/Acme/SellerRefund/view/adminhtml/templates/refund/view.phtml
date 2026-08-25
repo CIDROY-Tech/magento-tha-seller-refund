@@ -1,0 +1,108 @@
+<?php
+/** @var \Acme\SellerRefund\Block\Adminhtml\Refund\View $block */
+$refund = $block->getRefund();
+$figures = $block->getFigures();
+$currency = $figures->currency;
+$canSeeRaw = $block->canSeeRawPayload();
+?>
+<div class="acme-refund-detail">
+    <section class="acme-refund-summary">
+        <h2><?= $block->escapeHtml($refund->getRefundNo()) ?></h2>
+        <table class="data table">
+            <tbody>
+                <tr><th><?= $block->escapeHtml(__('Status')) ?></th><td><?= $block->escapeHtml($refund->getStatus()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Refund Type')) ?></th><td><?= $block->escapeHtml($refund->getRefundType()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Create Status')) ?></th><td><?= $block->escapeHtml($refund->getCreateStatus()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Cash Refund Status')) ?></th><td><?= $block->escapeHtml($refund->getCashRefundStatus()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Status Check')) ?></th><td><?= $block->escapeHtml($refund->getStatusCheckStatus()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Confirm Status')) ?></th><td><?= $block->escapeHtml($refund->getConfirmStatus()) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('ERP Refund Id')) ?></th><td><?= $block->escapeHtml($refund->getErpRefundId()) ?></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="acme-refund-figures">
+        <h3><?= $block->escapeHtml(__('Pre-refund Total')) ?></h3>
+        <table class="data table">
+            <tbody>
+                <tr><th><?= $block->escapeHtml(__('Product Subtotal')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundSubtotal, $currency)) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Shipping')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundShipping, $currency)) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Consumption Tax')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundTax, $currency)) ?></td></tr>
+                <tr><th><?= $block->escapeHtml(__('Total')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundGrandTotal, $currency)) ?></td></tr>
+            </tbody>
+        </table>
+
+        <h3><?= $block->escapeHtml(__('Refund')) ?><?php if ($figures->isPartial()): ?> <?= $block->escapeHtml(__('(Partial)')) ?><?php endif; ?></h3>
+        <table class="data table">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                    <th><?= $block->escapeHtml(__('Product')) ?></th>
+                    <th><?= $block->escapeHtml(__('Qty')) ?></th>
+                    <th><?= $block->escapeHtml(__('Ex-tax')) ?></th>
+                    <th><?= $block->escapeHtml(__('Tax')) ?></th>
+                    <th><?= $block->escapeHtml(__('Total')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($figures->lines as $line): ?>
+                <tr>
+                    <td><?= $block->escapeHtml($line->sku) ?></td>
+                    <td><?= $block->escapeHtml($line->productName) ?></td>
+                    <td><?= $block->escapeHtml($line->qtyRefund) ?></td>
+                    <td><?= $block->escapeHtml($block->formatMoney($line->rowAmount, $currency)) ?></td>
+                    <td><?= $block->escapeHtml($block->formatMoney($line->taxAmount, $currency)) ?></td>
+                    <td><?= $block->escapeHtml($block->formatMoney($line->grandTotal, $currency)) ?></td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+            <tfoot>
+                <tr><th colspan="5"><?= $block->escapeHtml(__('Refund Total')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->refundGrandTotal, $currency)) ?></td></tr>
+            </tfoot>
+        </table>
+    </section>
+
+    <section class="acme-refund-actions">
+        <a class="action-secondary" href="<?= $block->escapeUrl($block->getActionUrl('receipt')) ?>"><?= $block->escapeHtml(__('Download Receipt')) ?></a>
+    </section>
+
+    <section class="acme-refund-audit">
+        <h3><?= $block->escapeHtml(__('Audit Log')) ?></h3>
+        <table class="data table">
+            <thead>
+                <tr>
+                    <th><?= $block->escapeHtml(__('When')) ?></th>
+                    <th><?= $block->escapeHtml(__('Event')) ?></th>
+                    <th><?= $block->escapeHtml(__('Status')) ?></th>
+                    <th><?= $block->escapeHtml(__('From')) ?></th>
+                    <th><?= $block->escapeHtml(__('To')) ?></th>
+                    <th><?= $block->escapeHtml(__('API')) ?></th>
+                    <th><?= $block->escapeHtml(__('Attempt')) ?></th>
+                    <th><?= $block->escapeHtml(__('Error')) ?></th>
+                    <?php if ($canSeeRaw): ?>
+                        <th><?= $block->escapeHtml(__('Request')) ?></th>
+                        <th><?= $block->escapeHtml(__('Response')) ?></th>
+                    <?php endif; ?>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($block->getEvents() as $event): ?>
+                <tr>
+                    <td><?= $block->escapeHtml($event->getCreatedAt()) ?></td>
+                    <td><?= $block->escapeHtml($event->getEventType()) ?></td>
+                    <td><?= $block->escapeHtml($event->getEventStatus()) ?></td>
+                    <td><?= $block->escapeHtml($event->getStatusFrom()) ?></td>
+                    <td><?= $block->escapeHtml($event->getStatusTo()) ?></td>
+                    <td><?= $block->escapeHtml($event->getApiCode()) ?></td>
+                    <td><?= $block->escapeHtml($event->getAttemptNo()) ?></td>
+                    <td><?= $block->escapeHtml($event->getErrorCode()) ?></td>
+                    <?php if ($canSeeRaw): ?>
+                        <td><pre><?= $block->escapeHtml($event->getRequestPayload()) ?></pre></td>
+                        <td><pre><?= $block->escapeHtml($event->getResponsePayload()) ?></pre></td>
+                    <?php endif; ?>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+    </section>
+</div>

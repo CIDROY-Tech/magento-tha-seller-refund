@@ -1,0 +1,80 @@
+<?php
+/** @var \Acme\SellerRefund\Block\Adminhtml\Refund\Form $block */
+$lines = $block->getSellerLines();
+$config = $block->getJsConfig();
+$currency = $config['currency'];
+?>
+<div id="acme-refund-form" class="acme-refund-form">
+    <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($config['formKey']) ?>"/>
+    <input type="hidden" data-role="order-id" name="order_id" value="<?= $block->escapeHtmlAttr($config['orderId']) ?>"/>
+
+    <div class="admin__field">
+        <label class="admin__field-label" for="acme-refund-reason"><?= $block->escapeHtml(__('Reason')) ?></label>
+        <div class="admin__field-control">
+            <select id="acme-refund-reason" data-role="reason" name="reason_code">
+                <option value="damaged"><?= $block->escapeHtml(__('Damaged')) ?></option>
+                <option value="wrong_item"><?= $block->escapeHtml(__('Wrong item')) ?></option>
+                <option value="customer_request"><?= $block->escapeHtml(__('Customer request')) ?></option>
+            </select>
+        </div>
+    </div>
+
+    <table class="data-grid acme-refund-lines">
+        <thead>
+            <tr>
+                <th><?= $block->escapeHtml(__('SKU')) ?></th>
+                <th><?= $block->escapeHtml(__('Product')) ?></th>
+                <th><?= $block->escapeHtml(__('Ordered')) ?></th>
+                <th><?= $block->escapeHtml(__('Previously Refunded')) ?></th>
+                <th><?= $block->escapeHtml(__('Remaining')) ?></th>
+                <th><?= $block->escapeHtml(__('Unit Price')) ?></th>
+                <th><?= $block->escapeHtml(__('Tax Rate')) ?></th>
+                <th><?= $block->escapeHtml(__('Refund Qty')) ?></th>
+                <th><?= $block->escapeHtml(__('Line Amount')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($lines as $line): ?>
+            <tr data-role="line-row" data-order-item-id="<?= $block->escapeHtmlAttr($line['order_item_id']) ?>">
+                <td><?= $block->escapeHtml($line['sku']) ?></td>
+                <td><?= $block->escapeHtml($line['product_name']) ?></td>
+                <td><?= $block->escapeHtml($line['qty_ordered']) ?></td>
+                <td><?= $block->escapeHtml($line['qty_refunded_before']) ?></td>
+                <td data-role="remaining"><?= $block->escapeHtml($line['qty_remaining']) ?></td>
+                <td><?= $block->escapeHtml($block->formatMoney($line['unit_price'], $currency)) ?></td>
+                <td><?= $block->escapeHtml($line['tax_rate']) ?></td>
+                <td>
+                    <input type="number" min="0" step="1"
+                           data-role="qty-input"
+                           data-order-item-id="<?= $block->escapeHtmlAttr($line['order_item_id']) ?>"
+                           name="items[<?= $block->escapeHtmlAttr($line['order_item_id']) ?>]"
+                           value="0"/>
+                </td>
+                <td data-role="line-amount">&mdash;</td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="8"><?= $block->escapeHtml(__('Grand Total')) ?></th>
+                <td data-role="grand-total">&mdash;</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="acme-refund-actions">
+        <button type="button" class="action-primary" data-role="submit">
+            <span><?= $block->escapeHtml(__('Submit Refund')) ?></span>
+        </button>
+        <p data-role="state" class="acme-refund-state"></p>
+        <p><a data-role="receipt-link" href="#" hidden="hidden"><?= $block->escapeHtml(__('Download receipt')) ?></a></p>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    "#acme-refund-form": {
+        "acmeRefundForm": <?= /* @noEscape */ json_encode($config, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>
+    }
+}
+</script>

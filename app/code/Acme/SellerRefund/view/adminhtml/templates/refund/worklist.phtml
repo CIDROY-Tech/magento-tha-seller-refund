@@ -1,0 +1,41 @@
+<?php
+/** @var \Acme\SellerRefund\Block\Adminhtml\Refund\Worklist $block */
+$refunds = $block->getRefunds();
+?>
+<div class="acme-refund-worklist">
+    <table class="data-grid">
+        <thead>
+            <tr>
+                <th><?= $block->escapeHtml(__('Refund No')) ?></th>
+                <th><?= $block->escapeHtml(__('Order #')) ?></th>
+                <th><?= $block->escapeHtml(__('Seller Order')) ?></th>
+                <th><?= $block->escapeHtml(__('Status')) ?></th>
+                <th><?= $block->escapeHtml(__('Create Status')) ?></th>
+                <th><?= $block->escapeHtml(__('Lines')) ?></th>
+                <th><?= $block->escapeHtml(__('Refund Qty')) ?></th>
+                <th><?= $block->escapeHtml(__('Order Total')) ?></th>
+                <th><?= $block->escapeHtml(__('Refund Total')) ?></th>
+                <th><?= $block->escapeHtml(__('Created At')) ?></th>
+                <th><?= $block->escapeHtml(__('Action')) ?></th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($refunds as $refund): ?>
+            <?php $currency = (string) $refund->getCurrencyCode(); ?>
+            <tr>
+                <td><?= $block->escapeHtml($refund->getRefundNo()) ?></td>
+                <td><?= $block->escapeHtml($refund->getData('order_increment_id')) ?></td>
+                <td><?= $block->escapeHtml($refund->getData('seller_code')) ?></td>
+                <td><?= $block->escapeHtml($refund->getStatus()) ?></td>
+                <td><?= $block->escapeHtml($refund->getCreateStatus()) ?></td>
+                <td><?= $block->escapeHtml($refund->getData('line_count')) ?></td>
+                <td><?= $block->escapeHtml($refund->getData('qty_refund_total')) ?></td>
+                <td><?= $block->escapeHtml($block->formatMoney($refund->getData('order_grand_total'), $currency)) ?></td>
+                <td><?= $block->escapeHtml($block->formatMoney($refund->getGrandTotal(), $currency)) ?></td>
+                <td><?= $block->escapeHtml($refund->getCreatedAt()) ?></td>
+                <td><a href="<?= $block->escapeUrl($block->getViewUrl((int) $refund->getEntityId())) ?>"><?= $block->escapeHtml(__('View')) ?></a></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

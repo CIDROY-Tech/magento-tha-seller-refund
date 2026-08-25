@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Acme_SellerRefund::refund"
+             title="Seller Refunds"
+             translate="title"
+             module="Acme_SellerRefund"
+             parent="Magento_Sales::sales"
+             sortOrder="90"
+             action="acme_refund/refund/index"
+             resource="Acme_SellerRefund::view"/>
+    </menu>
+</config>
