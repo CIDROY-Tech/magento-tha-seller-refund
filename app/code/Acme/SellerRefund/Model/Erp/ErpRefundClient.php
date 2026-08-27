@@ -82,6 +82,15 @@ class ErpRefundClient
         return $this->decode($curl->getBody());
     }
 
+    /**
+     * Fresh ledger check used by the create-idempotency guard: has a create for this
+     * refund_no already succeeded upstream?
+     */
+    public function hasSucceededCreate(string $refundNo): bool
+    {
+        return $this->refundResource->isCreateSucceeded($refundNo);
+    }
+
     private function newCurl(string $correlationId): Curl
     {
         $curl = $this->curlFactory->create();

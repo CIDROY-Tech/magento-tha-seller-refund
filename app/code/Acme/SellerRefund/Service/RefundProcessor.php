@@ -125,6 +125,12 @@ class RefundProcessor
             return;
         }
 
+        // REF-142: a retried Create after a worker crash must not open a second
+        // credit note; skip when this refund_no already created upstream.
+        if ($this->client->hasSucceededCreate($refund->getRefundNo())) {
+            return;
+        }
+
         $items = $this->refundRepository->getItems($refundId);
         $order = $this->orderRepository->get($refund->getOrderId());
         $payload = $this->payloadBuilder->build($refund, $items, $order);

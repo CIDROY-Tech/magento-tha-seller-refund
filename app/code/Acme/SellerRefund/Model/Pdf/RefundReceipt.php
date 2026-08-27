@@ -42,10 +42,10 @@ class RefundReceipt
             'is_partial' => $figures->isPartial(),
             'refund_date' => $this->refundDate($refund),
             'pre_refund' => [
-                'subtotal' => $this->num($order->getSubtotal()),
-                'shipping' => $this->num($order->getShippingAmount()),
-                'tax' => $this->num($order->getTaxAmount()),
-                'grand_total' => $this->num($order->getGrandTotal()),
+                'subtotal' => $figures->preRefundSubtotal,
+                'shipping' => $figures->preRefundShipping,
+                'tax' => $figures->preRefundTax,
+                'grand_total' => $figures->preRefundGrandTotal,
             ],
             'refund' => [
                 'subtotal' => $figures->refundSubtotal,
@@ -147,11 +147,6 @@ class RefundReceipt
     private function money(mixed $amount, string $currency): string
     {
         return $currency . ' ' . number_format((float) $amount, 0, '.', ',');
-    }
-
-    private function num(mixed $value): string
-    {
-        return sprintf('%.4F', (float) $value);
     }
 
     private function ascii(string $value): string
