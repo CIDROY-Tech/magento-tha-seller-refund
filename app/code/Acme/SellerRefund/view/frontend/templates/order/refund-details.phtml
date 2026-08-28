@@ -1,0 +1,47 @@
+<?php
+/** @var \Acme\SellerRefund\Block\Order\RefundDetails $block */
+$refundViews = $block->getRefundViews();
+?>
+<?php if ($refundViews): ?>
+    <div class="acme-order-refunds">
+        <?php foreach ($refundViews as $view): ?>
+            <?php
+            $refund = $view['refund'];
+            $figures = $view['figures'];
+            $currency = $figures->currency;
+            ?>
+            <div class="acme-order-refund" data-refund-no="<?= $block->escapeHtmlAttr($refund->getRefundNo()) ?>">
+                <h3 class="acme-order-refund__heading">
+                    <?php if ($figures->isPartial()): ?>
+                        <?= $block->escapeHtml(__('Partial Refund')) ?>
+                    <?php else: ?>
+                        <?= $block->escapeHtml(__('Refund')) ?>
+                    <?php endif; ?>
+                    <span class="acme-order-refund__no"><?= $block->escapeHtml($refund->getRefundNo()) ?></span>
+                </h3>
+
+                <table class="data table acme-order-refund__preref">
+                    <caption class="table-caption"><?= $block->escapeHtml(__('Pre-refund Total')) ?></caption>
+                    <tbody>
+                        <tr><th><?= $block->escapeHtml(__('Product Subtotal')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundSubtotal, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Shipping')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundShipping, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Consumption Tax')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundTax, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Total')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->preRefundGrandTotal, $currency)) ?></td></tr>
+                    </tbody>
+                </table>
+
+                <table class="data table acme-order-refund__refund">
+                    <caption class="table-caption"><?= $block->escapeHtml(__('Refund')) ?></caption>
+                    <tbody>
+                        <tr><th><?= $block->escapeHtml(__('Refund Date')) ?></th><td><?= $block->escapeHtml($block->renderRefundDate($refund->getCreatedAt())) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Product Subtotal')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->refundSubtotal, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Shipping')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->refundShipping, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Ex-tax Amount')) ?></th><td><?= $block->escapeHtml($block->formatMoney(bcadd($figures->refundSubtotal, $figures->refundShipping, 4), $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Consumption Tax')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->refundTax, $currency)) ?></td></tr>
+                        <tr><th><?= $block->escapeHtml(__('Total')) ?></th><td><?= $block->escapeHtml($block->formatMoney($figures->refundGrandTotal, $currency)) ?></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

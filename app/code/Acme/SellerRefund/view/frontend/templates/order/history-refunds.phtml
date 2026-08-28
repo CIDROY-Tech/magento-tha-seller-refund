@@ -1,0 +1,33 @@
+<?php
+/** @var \Magento\Framework\View\Element\Template $block */
+/** @var \Acme\SellerRefund\ViewModel\OrderHistoryRefunds $viewModel */
+$viewModel = $block->getData('refunds_view_model');
+$entries = $viewModel ? $viewModel->getEntries() : [];
+?>
+<?php if ($entries): ?>
+    <div class="acme-order-history-refunds">
+        <h2 class="acme-order-history-refunds__title"><?= $block->escapeHtml(__('Refunded Orders')) ?></h2>
+        <?php foreach ($entries as $entry): ?>
+            <div class="acme-order-history-refund">
+                <h3><?= $block->escapeHtml(__('Order # %1', $entry['increment_id'])) ?></h3>
+                <?php foreach ($entry['refunds'] as $refundView): ?>
+                    <?php $figures = $refundView['figures']; ?>
+                    <p class="acme-order-history-refund__summary">
+                        <?php if ($figures->isPartial()): ?>
+                            <span class="acme-refund-label"><?= $block->escapeHtml(__('Partial Refund')) ?></span>
+                        <?php else: ?>
+                            <span class="acme-refund-label"><?= $block->escapeHtml(__('Refund')) ?></span>
+                        <?php endif; ?>
+                        <span class="acme-refund-no"><?= $block->escapeHtml($refundView['refund']->getRefundNo()) ?></span>
+                        <span class="acme-refund-total"><?= $block->escapeHtml($viewModel->formatMoney($figures->refundGrandTotal, $figures->currency)) ?></span>
+                    </p>
+                    <ul class="acme-order-history-refund__items">
+                        <?php foreach ($refundView['skus'] as $sku): ?>
+                            <li class="acme-refunded-item"><?= $block->escapeHtml(__('Refunded: %1', $sku)) ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endforeach; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>

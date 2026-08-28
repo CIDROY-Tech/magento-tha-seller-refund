@@ -1,0 +1,62 @@
+<!--@subject Your refund {{var refund_no}} has been confirmed @-->
+<!--@vars {
+"var refund_no":"Refund number",
+"var currency":"Currency",
+"var refund_totals.grand_total":"Refund total"
+} @-->
+{{template config_path="design/email/header_template"}}
+
+<table cellspacing="0" cellpadding="0" border="0" width="100%">
+    <tr>
+        <td>
+            <h1>{{trans "Refund confirmed"}}</h1>
+            <p>{{trans "Refund number: %refund_no" refund_no=$refund_no}}</p>
+            {{if is_partial}}
+            <p>{{trans "This is a partial refund."}}</p>
+            {{/if}}
+
+            <h2>{{trans "Pre-refund total"}}</h2>
+            <table cellspacing="0" cellpadding="4" border="0" width="100%">
+                <tr><td>{{trans "Product subtotal"}}</td><td align="right">{{var currency}} {{var pre_refund.subtotal}}</td></tr>
+                <tr><td>{{trans "Shipping"}}</td><td align="right">{{var currency}} {{var pre_refund.shipping}}</td></tr>
+                <tr><td>{{trans "Consumption tax"}}</td><td align="right">{{var currency}} {{var pre_refund.tax}}</td></tr>
+                <tr><td><strong>{{trans "Total"}}</strong></td><td align="right"><strong>{{var currency}} {{var pre_refund.grand_total}}</strong></td></tr>
+            </table>
+
+            <h2>{{trans "Refund"}}</h2>
+            <table cellspacing="0" cellpadding="4" border="0" width="100%">
+                <thead>
+                    <tr>
+                        <th align="left">{{trans "SKU"}}</th>
+                        <th align="left">{{trans "Product"}}</th>
+                        <th align="right">{{trans "Qty"}}</th>
+                        <th align="right">{{trans "Ex-tax"}}</th>
+                        <th align="right">{{trans "Tax"}}</th>
+                        <th align="right">{{trans "Total"}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{for line in lines}}
+                    <tr>
+                        <td>{{var line.sku}}</td>
+                        <td>{{var line.product_name}}</td>
+                        <td align="right">{{var line.qty_refund}}</td>
+                        <td align="right">{{var currency}} {{var line.row_amount}}</td>
+                        <td align="right">{{var currency}} {{var line.tax_amount}}</td>
+                        <td align="right">{{var currency}} {{var line.grand_total}}</td>
+                    </tr>
+                    {{/for}}
+                </tbody>
+            </table>
+
+            <table cellspacing="0" cellpadding="4" border="0" width="100%">
+                <tr><td>{{trans "Product subtotal"}}</td><td align="right">{{var currency}} {{var refund_totals.subtotal}}</td></tr>
+                <tr><td>{{trans "Shipping"}}</td><td align="right">{{var currency}} {{var refund_totals.shipping}}</td></tr>
+                <tr><td>{{trans "Consumption tax"}}</td><td align="right">{{var currency}} {{var refund_totals.tax}}</td></tr>
+                <tr><td><strong>{{trans "Refund total"}}</strong></td><td align="right"><strong>{{var currency}} {{var refund_totals.grand_total}}</strong></td></tr>
+            </table>
+        </td>
+    </tr>
+</table>
+
+{{template config_path="design/email/footer_template"}}
