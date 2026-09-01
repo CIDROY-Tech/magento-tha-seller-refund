@@ -1,0 +1,3 @@
+# Align partial-refund presentation and validation
+
+QA reopened the partial-refund receipt: the refund breakdown was missing and the total line did not read as the pre-refund amount. This adds the partial-refund layout to the reissued receipt - partial-refund label, refund date, product subtotal / shipping / ex-tax / consumption tax / total - and the per-rate tax groups the qualified invoice needs, with the header showing the original order figures. The receipt link now appears as soon as the refund is submitted so CS can hand it over immediately. Testing: regenerated receipts for a full and a partial refund on a delivered seller order and checked the PDF visually against the FRD layout; unit tests added for the new layout. No connector changes.
