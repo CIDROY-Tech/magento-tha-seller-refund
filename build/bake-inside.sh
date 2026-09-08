@@ -142,7 +142,11 @@ if [ -f app/code/Acme/SellerRefund/Test/Integration/phpunit.xml ]; then
 else
   log "no integration suite yet - skipping"
 fi
-bash dev/tests/smoke/smoke.sh
+# Smoke (reachability, incl. the health 200 gate) runs in bake.sh pass-2 via
+# `assignment-test all` against the runtime image, which carries
+# /etc/assignment/seed-version. In this installer phase the health endpoint
+# returns 503 by design (see assignment-warm.sh), so smoke does not belong here;
+# unit + integration above validate the application logic.
 
 log "clean transient state"
 rm -rf var/log/* var/session/* var/report/* var/tmp/* 2>/dev/null || true

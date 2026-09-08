@@ -55,16 +55,15 @@ build-args. They are recorded verbatim from `build/base-images.env`.
 ## Shipped image digests
 
 The four images below are published to GHCR and referenced by digest in
-`compose.yaml`. Digests are pinned into `compose.yaml` at publish time; the
-`sha256:` values here are placeholders until then. Reproduce a digest with
+`compose.yaml`. Digests are pinned into `compose.yaml` and the table below (release `r1`). Reproduce a digest with
 `docker buildx imagetools inspect <ref> --format '{{.Manifest.Digest}}'`.
 
 | Image | Tag | Digest |
 |---|---|---|
-| `ghcr.io/cidroy-tech/seller-refund-web` | `2.4.7-p10` | `sha256:<PINNED-AT-PUBLISH>` |
-| `ghcr.io/cidroy-tech/seller-refund-db` | `2.4.7-p10` | `sha256:<PINNED-AT-PUBLISH>` |
-| `ghcr.io/cidroy-tech/seller-refund-search` | `2.12.0` | `sha256:<PINNED-AT-PUBLISH>` |
-| `ghcr.io/cidroy-tech/seller-refund-erp-stub` | `1.0.0` | `sha256:<PINNED-AT-PUBLISH>` |
+| `ghcr.io/cidroy-tech/seller-refund-web` | `2.4.7-p10-r1` | `sha256:e80c1bef4f756f4df47f5a5f1c6fb8b0329029cbc8c82df8e2422033ab9e90b7` |
+| `ghcr.io/cidroy-tech/seller-refund-db` | `2.4.7-p10-r1` | `sha256:e52a18aaf4e30e724956b257f00339570f429df8af4a9085e2be97ede0e2148d` |
+| `ghcr.io/cidroy-tech/seller-refund-search` | `2.12.0-r1` | `sha256:4d221f26aeb90b008c9f19fcf20efaa6f324128bc6ba03d69dba47b7cde2c571` |
+| `ghcr.io/cidroy-tech/seller-refund-erp-stub` | `1.0.0` | `sha256:87ddcd936f68c8fcfe1eb02189a457cf0700da008412b8c842f116d7163404d8` |
 
 ## License posture
 

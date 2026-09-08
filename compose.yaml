@@ -25,7 +25,7 @@ x-logging: &logging
 services:
   db:
     <<: [*restart, *logging]
-    image: ghcr.io/cidroy-tech/seller-refund-db:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    image: ghcr.io/cidroy-tech/seller-refund-db:2.4.7-p10-r1@sha256:e52a18aaf4e30e724956b257f00339570f429df8af4a9085e2be97ede0e2148d
     mem_limit: 1g
     volumes:
       - db-data:/var/lib/mysql
@@ -41,7 +41,7 @@ services:
 
   search:
     <<: [*restart, *logging]
-    image: ghcr.io/cidroy-tech/seller-refund-search:2.12.0@sha256:REPLACE_AT_PUBLISH
+    image: ghcr.io/cidroy-tech/seller-refund-search:2.12.0-r1@sha256:4d221f26aeb90b008c9f19fcf20efaa6f324128bc6ba03d69dba47b7cde2c571
     mem_limit: 1g
     ulimits:
       memlock:
@@ -62,7 +62,7 @@ services:
 
   erp-refund-stub:
     <<: [*restart, *logging]
-    image: ghcr.io/cidroy-tech/seller-refund-erp-stub:1.0.0@sha256:REPLACE_AT_PUBLISH
+    image: ghcr.io/cidroy-tech/seller-refund-erp-stub:1.0.0@sha256:87ddcd936f68c8fcfe1eb02189a457cf0700da008412b8c842f116d7163404d8
     mem_limit: 128m
     ports:
       - "${STUB_PORT:-8081}:8081"
@@ -78,7 +78,7 @@ services:
 
   web:
     <<: [*restart, *logging]
-    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10-r1@sha256:e80c1bef4f756f4df47f5a5f1c6fb8b0329029cbc8c82df8e2422033ab9e90b7
     mem_limit: 3g
     depends_on:
       db:
@@ -110,7 +110,7 @@ services:
     # Reuses the web image purely as a readiness gate: it waits for every
     # service to answer, prints the banner, and touches a marker file that its
     # own healthcheck watches.
-    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10@sha256:REPLACE_AT_PUBLISH
+    image: ghcr.io/cidroy-tech/seller-refund-web:2.4.7-p10-r1@sha256:e80c1bef4f756f4df47f5a5f1c6fb8b0329029cbc8c82df8e2422033ab9e90b7
     mem_limit: 64m
     entrypoint: ["/var/www/html/assignment-ready.sh"]
     depends_on:

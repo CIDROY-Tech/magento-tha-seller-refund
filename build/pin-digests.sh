@@ -51,7 +51,7 @@ for entry in "${IMAGES[@]}"; do
     exit 1
   fi
   # Replace any existing tag@digest (placeholder or real) for this image.
-  sed -i -E "s#(${REGISTRY}/${name}):[^@\"[:space:]]*@sha256:[0-9a-fA-F]+#\1:${tag}@${digest}#g" "$COMPOSE"
+  sed -i -E "s#(${REGISTRY}/${name}):[^@\"[:space:]]*@sha256:[0-9A-Za-z_]+#\1:${tag}@${digest}#g" "$COMPOSE"
   echo "| ${name} | ${tag} | ${digest} |" >> "$DIGEST_NOTE"
   echo "[pin] ${name} -> ${digest}"
 done

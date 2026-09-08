@@ -9,3 +9,9 @@ bootstrap.memory_lock: true
 # mmap is disabled so the node runs without host vm.max_map_count tuning;
 # bootstrap checks are not enforced under discovery.type=single-node.
 node.store.allow_mmap: false
+
+# Single-node dev node: do not let disk-usage watermarks block index creation
+# or writes when the host disk is tight (CI runners, small dev machines). On a
+# single node there is nowhere to reallocate shards anyway, so the disk decider
+# only causes a FORBIDDEN "cluster create-index blocked" on first reindex.
+cluster.routing.allocation.disk.threshold_enabled: false

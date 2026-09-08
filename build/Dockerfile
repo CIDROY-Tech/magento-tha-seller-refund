@@ -127,7 +127,7 @@ CMD ["supervisord", "-c", "/etc/supervisor/conf.d/assignment.conf"]
 # ---------------------------------------------------------------------------
 FROM base AS runtime
 
-ARG IMAGE_SOURCE=https://github.com/CIDROY-Tech/seller-refund-takehome
+ARG IMAGE_SOURCE=https://github.com/CIDROY-Tech/magento-tha-seller-refund
 ARG SEED_VERSION=dev
 LABEL org.opencontainers.image.source=$IMAGE_SOURCE
 
